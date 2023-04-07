@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    ports:
+      - 6380:6379
+
+  db:
+    container_name: postgres
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: conversion_tool
+    ports:
+      - 5433:5432
+
+  worker:
+    container_name: worker
+    image: worker
+    build: .
+    command: [ "celery", "-A", "make_celery", "worker", "--loglevel", "INFO" ]
+    volumes:
+      - ./data:/code/data
+    restart: always
+    depends_on:
+      - redis
+      - db
+
+  web:
+    container_name: web
+    image: web
+    build: .
+    command: [ "flask", "-A", "app", "run", "-h", "0.0.0.0" ]
+    ports:
+      - 5000:5000
+    volumes:
+      - ./data:/code/data
+    restart: always
+    depends_on:
+      - redis
+      - db
