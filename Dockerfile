@@ -1,6 +1,8 @@
-FROM python:3.8-alpine
+FROM python:3.11.3-alpine
 
+RUN apk add build-base linux-headers
 RUN mkdir -p /code/data
+
 WORKDIR /code
 
 ENV FLASK_CONFIG=production
