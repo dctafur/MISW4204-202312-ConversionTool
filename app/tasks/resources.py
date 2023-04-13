@@ -1,12 +1,11 @@
-from flask import request
+from os import path
+from flask import request, current_app
 from flask_restful import Resource
-from flask_expects_json import expects_json
 from flask_jwt_extended import get_current_user, jwt_required
+from werkzeug.utils import secure_filename
 
 from app.database import db
 from app.tasks.models import Task, TaskSchema
-from app.tasks.jobs import convert_file
-from app.tasks.schemas import create_task
 
 
 class TaskCrud(Resource):
@@ -34,21 +33,28 @@ class TaskCrud(Resource):
         return task_schema.dump(task), 200
 
     @jwt_required()
-    @expects_json(create_task)
     def post(self):
+        if 'filename' not in request.files:
+            return {'message': 'No file part'}, 400
+
+        file = request.files['filename']
+        if file.filename == '':
+            return {'message': 'No selected file'}, 400
+
+        filename = secure_filename(file.filename)
+        uploads = path.join(path.dirname(current_app.root_path), current_app.config['UPLOAD_DIR'])
+        file.save(path.join(uploads, filename))
+
         user = get_current_user()
-        file_name = request.json['fileName']
-        new_format = request.json['newFormat']
+        new_format = request.form['newFormat']
 
         allowed_formats = ['7Z', 'ZIP', 'TAR.GZ']
         if not new_format in allowed_formats:
             return {'message': f'Allowed formats are: {", ".join(allowed_formats)}'}, 400
 
-        task = Task(file_name=file_name, new_format=new_format, user_id=user.id)
+        task = Task(filename=filename, new_format=new_format, user_id=user.id)
         db.session.add(task)
         db.session.commit()
-
-        convert_file.delay(task.id)
 
         task_schema = TaskSchema()
         return task_schema.dump(task), 201

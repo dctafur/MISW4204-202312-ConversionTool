@@ -1,5 +1,5 @@
-from os import environ, path
-from flask import Flask, send_file
+from os import environ
+from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from werkzeug.exceptions import HTTPException
@@ -52,15 +52,8 @@ def init_jwt_manager(app):
 
 
 def init_restful_api(app):
-    def output_file(data, code, headers):
-        file_name = data['file_name']
-        upload_dir = path.join(path.dirname(app.root_path), app.config['UPLOAD_DIR'])
-        file_path = f'{upload_dir}/{file_name}'
-        return send_file(file_path, as_attachment=True)
-
     api = Api(app, prefix='/api')
-    api.representations['application/octet-stream'] = output_file
     api.add_resource(Login, '/auth/login')
     api.add_resource(SignUp, '/auth/signup')
     api.add_resource(TaskCrud, '/tasks', '/tasks/<id>')
-    api.add_resource(ReadFile, '/files/<file_name>')
+    api.add_resource(ReadFile, '/files/<filename>')

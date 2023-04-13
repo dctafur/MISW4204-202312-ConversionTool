@@ -16,23 +16,23 @@ def convert_file(id):
         upload_dir = 'data'
 
         format = task.new_format.lower()
-        file_name = task.file_name
+        filename = task.filename
 
-        input_path = f'{upload_dir}/{file_name}'
+        input_path = f'{upload_dir}/{filename}'
         output_path = f'{upload_dir}/{task.id}.{format}'
 
         if format == '7z':
             with ZipFile(output_path, mode='w') as f:
-                f.write(input_path, arcname=file_name)
+                f.write(input_path, arcname=filename)
 
         if format == 'zip':
             with SevenZipFile(output_path, mode='w') as f:
-                f.write(input_path, arcname=file_name)
+                f.write(input_path, arcname=filename)
 
         if format == 'tar.gz':
             with open(output_path, mode='w:gz') as f:
-                f.add(input_path, arcname=file_name)
+                f.add(input_path, arcname=filename)
 
         task.status = 'PROCESSED'
-        task.processed_file_name = output_path
+        task.processed_filename = output_path
         db.session.commit()
