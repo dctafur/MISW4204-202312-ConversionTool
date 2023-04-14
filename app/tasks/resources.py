@@ -1,4 +1,4 @@
-from os import path
+from os import path, remove
 from flask import request, current_app
 from flask_restful import Resource
 from flask_jwt_extended import get_current_user, jwt_required
@@ -62,6 +62,14 @@ class TaskCrud(Resource):
     @jwt_required()
     def delete(self, id):
         task = Task.query.get_or_404(id)
+
+        if task.status != 'PROCESSED':
+            return {'message': 'The task is still being processed'}, 400
+
+        uploads = path.join(path.dirname(current_app.root_path), current_app.config['UPLOAD_DIR'])
+        remove(path.join(uploads, task.filename))
+        remove(path.join(uploads, task.processed_filename))
+
         db.session.delete(task)
         db.session.commit()
         return '', 204
