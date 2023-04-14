@@ -4,6 +4,7 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from werkzeug.exceptions import HTTPException
 from celery import Celery, Task
+from celery.schedules import crontab
 
 from app.config import config
 from app.database import init_db
@@ -38,6 +39,13 @@ def init_celery_app(app):
     celery_app = Celery(app.name, task_cls=FlaskTask)
     celery_app.config_from_object(app.config['CELERY'])
     celery_app.set_default()
+    celery_app.conf.beat_schedule = {
+        'convert-files-cron': {
+            'task': 'app.tasks.jobs.convert_files',
+            'schedule': crontab(minute='*/1'),
+        },
+    }
+
     app.extensions["celery"] = celery_app
 
     return celery_app

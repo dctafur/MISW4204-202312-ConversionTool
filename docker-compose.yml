@@ -29,6 +29,17 @@ services:
       - redis
       - db
 
+  scheduler:
+    container_name: scheduler
+    build: .
+    image: beat
+    command: [ "celery", "-A", "make_celery", "beat", "--loglevel", "INFO" ]
+    volumes:
+      - ./data:/code/data
+    depends_on:
+      - redis
+      - db
+
   web:
     container_name: web
     image: web
