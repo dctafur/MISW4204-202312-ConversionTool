@@ -7,6 +7,7 @@ from celery import Celery, Task
 from celery.schedules import crontab
 
 from app.config import config
+from app.tasks.jobs import convert_files
 from app.database import init_db
 from app.users import Login, SignUp
 from app.tasks import TaskCrud
