@@ -12,10 +12,10 @@ class TaskCrud(Resource):
 
     @jwt_required()
     def get(self, id=None):
-        if not id:
-            user = get_current_user()
-            args = request.args.to_dict()
+        user = get_current_user()
 
+        if not id:
+            args = request.args.to_dict()
             sort = 'id' if args.get('sort') is None else args.get('sort')
             order = 'asc' if args.get('order') is None else args.get('order')
             page = 1 if args.get('page') is None else int(args.get('page'))
@@ -29,6 +29,10 @@ class TaskCrud(Resource):
             return {'items': task_schema.dump(page.items, many=True), 'meta': meta}, 200
 
         task = Task.query.get_or_404(id)
+
+        if (task.user_id != user.id):
+            return {'message': 'You don\'t have permissions to access this task'}, 403
+
         task_schema = TaskSchema()
         return task_schema.dump(task), 200
 
@@ -61,7 +65,11 @@ class TaskCrud(Resource):
 
     @jwt_required()
     def delete(self, id):
+        user = get_current_user()
         task = Task.query.get_or_404(id)
+
+        if (task.user_id != user.id):
+            return {'message': 'You don\'t have permissions to delete this task'}, 403
 
         if task.status != 'PROCESSED':
             return {'message': 'The task is still being processed'}, 400

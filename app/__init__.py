@@ -7,11 +7,10 @@ from celery import Celery, Task
 from celery.schedules import crontab
 
 from app.config import config
-from app.tasks.jobs import convert_files
 from app.database import init_db
-from app.users import Login, SignUp
-from app.tasks import TaskCrud
 from app.files import ReadFile
+from app.users import Login, SignUp
+from app.tasks import TaskCrud, convert_files
 from app.utils.handlers import http_exception_handler
 from app.utils.loaders import user_loader, expired_token_loader, unauthorized_loader
 
@@ -48,7 +47,6 @@ def init_celery_app(app):
     }
 
     app.extensions["celery"] = celery_app
-
     return celery_app
 
 
