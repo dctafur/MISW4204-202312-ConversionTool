@@ -1,6 +1,6 @@
 # Cloud Conversion Tool
 
-Este tutorial está diseñado con el propósito de presentar los pasos a seguir para ejecutar la aplicación Cloud Conversion Tool. La aplicación utiliza el framework Flask junto con la biblioteca Celery, una base de datos PostgreSQL y un servidor Redis como broker de mesajería.
+Este tutorial está diseñado con el propósito de presentar los pasos a seguir para ejecutar la aplicación Cloud Conversion Tool. La aplicación utiliza Python como lenguaje de programción, el framework Flask junto con las bibliotecas SQLAlchemy, Flask RESTful, Flask Marshmallow, Celery y Flask JWT Extended, además, utiliza una base de datos PostgreSQL, un servidor Redis como broker de mesajería y finalmente, está desplegada haciendo uso de un servidor Gunicorn.
 
 ### Requisitos previos
 
