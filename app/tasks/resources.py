@@ -1,4 +1,6 @@
 from os import path, remove
+from time import gmtime
+from calendar import timegm
 from flask import request, current_app
 from flask_restful import Resource
 from flask_jwt_extended import get_current_user, jwt_required
@@ -45,18 +47,21 @@ class TaskCrud(Resource):
         if file.filename == '':
             return {'message': 'No selected file'}, 400
 
-        filename = secure_filename(file.filename)
+        time_stamp = timegm(gmtime())
+        custom_name = f'{time_stamp}.{file.filename}'
+        file.filename = custom_name
+
         uploads = path.join(path.dirname(current_app.root_path), current_app.config['UPLOAD_DIR'])
-        file.save(path.join(uploads, filename))
+        file.save(path.join(uploads, secure_filename(file.filename)))
 
-        user = get_current_user()
         new_format = request.form['newFormat']
-
         allowed_formats = ['7Z', 'ZIP', 'TAR.GZ']
+
         if not new_format in allowed_formats:
             return {'message': f'Allowed formats are: {", ".join(allowed_formats)}'}, 400
 
-        task = Task(filename=filename, new_format=new_format, user_id=user.id)
+        user = get_current_user()
+        task = Task(filename=custom_name, new_format=new_format, user_id=user.id)
         db.session.add(task)
         db.session.commit()
 

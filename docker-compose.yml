@@ -44,9 +44,9 @@ services:
     container_name: web
     image: web
     build: .
-    command: [ "flask", "-A", "app", "run", "-h", "0.0.0.0" ]
+    command: [ "gunicorn", "-b", "0.0.0.0", "app:create_app()" ]
     ports:
-      - 5000:5000
+      - 5000:8000
     volumes:
       - ./data:/code/data
     restart: always
