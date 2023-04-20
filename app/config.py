@@ -5,7 +5,7 @@ class Config(object):
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
-    UPLOAD_DIR = 'data'
+    UPLOAD_DIR = '/nfs/general'
 
 
 class ProductionConfig(Config):
