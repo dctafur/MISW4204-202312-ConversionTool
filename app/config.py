@@ -1,4 +1,5 @@
 from datetime import timedelta
+from os import environ
 
 
 class Config(object):
@@ -10,10 +11,10 @@ class Config(object):
 
 class ProductionConfig(Config):
     JWT_SECRET_KEY = 'ThVmYq3t6w9z$C&F)J@NcRfUjXnZr4u7'
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://postgres:postgres@db:5432/conversion_tool'
+    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{environ.get('DB_USERNAME')}:{environ.get('DB_PASSWORD')}@{environ.get('DB_HOST')}:{environ.get('DB_PORT')}/{environ.get('DB_DATABASE')}"
     CELERY = dict({
-        'broker_url': 'redis://redis:6379',
-        'result_backend': 'redis://redis:6379',
+        'broker_url': 'redis://127.0.0.1:6379',
+        'result_backend': 'redis://127.0.0.1:6379',
     })
 
 
