@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 from datetime import timedelta
 
 basedir = path.abspath(path.dirname(__file__))
-load_dotenv(path.join(basedir, '.env'))
+load_dotenv(path.join(path.dirname(basedir), '.env'))
+
 
 class Config(object):
     TESTING = False
