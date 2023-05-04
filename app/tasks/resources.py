@@ -1,10 +1,10 @@
-from os import path, remove
+from os import environ
 from time import gmtime
 from calendar import timegm
 from flask import request, current_app
 from flask_restful import Resource
 from flask_jwt_extended import get_current_user, jwt_required
-from werkzeug.utils import secure_filename
+from google.cloud import storage
 
 from app.database import db
 from app.tasks.models import Task, TaskSchema
@@ -46,19 +46,20 @@ class TaskCrud(Resource):
         file = request.files['filename']
         if file.filename == '':
             return {'message': 'No selected file'}, 400
+        
+        new_format = request.form['newFormat']
+        allowed_formats = ['7Z', 'ZIP', 'TAR.GZ']
+        if not new_format in allowed_formats:
+            return {'message': f'Allowed formats are: {", ".join(allowed_formats)}'}, 400
 
         time_stamp = timegm(gmtime())
         custom_name = f'{time_stamp}.{file.filename}'
         file.filename = custom_name
 
-        uploads = path.join(path.dirname(current_app.root_path), current_app.config['UPLOAD_DIR'])
-        file.save(path.join(uploads, secure_filename(file.filename)))
-
-        new_format = request.form['newFormat']
-        allowed_formats = ['7Z', 'ZIP', 'TAR.GZ']
-
-        if not new_format in allowed_formats:
-            return {'message': f'Allowed formats are: {", ".join(allowed_formats)}'}, 400
+        gcs = storage.Client.from_service_account_json(current_app.config['CREDENTIALS'])
+        bucket = gcs.get_bucket(environ.get('BUCKET_NAME'))
+        blob = bucket.blob(file.filename)
+        blob.upload_from_string(file.read(), content_type=file.content_type)
 
         user = get_current_user()
         task = Task(filename=custom_name, new_format=new_format, user_id=user.id)
@@ -78,10 +79,13 @@ class TaskCrud(Resource):
 
         if task.status != 'PROCESSED':
             return {'message': 'The task is still being processed'}, 400
-
-        uploads = path.join(path.dirname(current_app.root_path), current_app.config['UPLOAD_DIR'])
-        remove(path.join(uploads, task.filename))
-        remove(path.join(uploads, task.processed_filename))
+        
+        gcs = storage.Client.from_service_account_json(current_app.config['CREDENTIALS'])
+        bucket = gcs.get_bucket(environ.get('BUCKET_NAME'))
+        blob = bucket.blob(task.filename)
+        processed_blob = bucket.blob(task.processed_filename)
+        blob.delete()
+        processed_blob.delete()
 
         db.session.delete(task)
         db.session.commit()

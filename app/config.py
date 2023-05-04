@@ -11,6 +11,7 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     UPLOAD_DIR = '/nfs/general'
+    CREDENTIALS = path.join(path.dirname(basedir), 'credentials.json')
 
 
 class ProductionConfig(Config):
