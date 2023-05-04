@@ -161,6 +161,10 @@ cython_debug/
 # Built Visual Studio Code Extensions
 *.vsix
 
+# Credentials
+.credentials.json
+credentials.json
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
