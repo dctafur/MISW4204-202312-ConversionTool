@@ -14,7 +14,7 @@ from app.tasks.models import Task
 
 @shared_task(ignore_result=False)
 def convert_files():
-    tasks = Task.query.filter_by(status='ERROR')
+    tasks = Task.query.filter_by(status='UPLOADED')
     if tasks:
         for task in tasks:
             try:
