@@ -13,5 +13,5 @@ class ReadFile(Resource):
         gcs = storage.Client.from_service_account_json(current_app.config['CREDENTIALS'])
         bucket = gcs.get_bucket(environ.get('BUCKET_NAME'))
         blob = bucket.blob(filename)
-        file = BytesIO(blob.download_as_string())
-        return send_file(file, download_name=filename, as_attachment=True)
+        file = blob.download_as_string()
+        return send_file(BytesIO(file), download_name=filename, as_attachment=True)

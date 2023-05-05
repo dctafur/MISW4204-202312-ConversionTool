@@ -46,7 +46,7 @@ class TaskCrud(Resource):
         file = request.files['filename']
         if file.filename == '':
             return {'message': 'No selected file'}, 400
-        
+
         new_format = request.form['newFormat']
         allowed_formats = ['7Z', 'ZIP', 'TAR.GZ']
         if not new_format in allowed_formats:
@@ -79,7 +79,7 @@ class TaskCrud(Resource):
 
         if task.status != 'PROCESSED':
             return {'message': 'The task is still being processed'}, 400
-        
+
         gcs = storage.Client.from_service_account_json(current_app.config['CREDENTIALS'])
         bucket = gcs.get_bucket(environ.get('BUCKET_NAME'))
         blob = bucket.blob(task.filename)
