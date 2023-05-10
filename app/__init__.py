@@ -4,13 +4,13 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from werkzeug.exceptions import HTTPException
 from celery import Celery, Task
-from celery.schedules import crontab
 
 from app.config import config
 from app.database import init_db
 from app.files import ReadFile
 from app.users import Login, SignUp
-from app.tasks import TaskCrud, convert_files
+from app.tasks import TaskCrud
+from app.convert import Convert
 from app.utils.handlers import http_exception_handler
 from app.utils.loaders import user_loader, expired_token_loader, unauthorized_loader
 
@@ -39,14 +39,8 @@ def init_celery_app(app):
     celery_app = Celery(app.name, task_cls=FlaskTask)
     celery_app.config_from_object(app.config['CELERY'])
     celery_app.set_default()
-    celery_app.conf.beat_schedule = {
-        'convert-files-cron': {
-            'task': 'app.tasks.jobs.convert_files',
-            'schedule': crontab(minute='*/1'),
-        },
-    }
-
     app.extensions["celery"] = celery_app
+
     return celery_app
 
 
@@ -64,3 +58,4 @@ def init_restful_api(app):
     api.add_resource(SignUp, '/auth/signup')
     api.add_resource(TaskCrud, '/tasks', '/tasks/<id>')
     api.add_resource(ReadFile, '/files/<filename>')
+    api.add_resource(Convert, '/convert/<id>')
