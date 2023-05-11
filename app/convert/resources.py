@@ -12,6 +12,6 @@ class Convert(Resource):
     def post(self):
         message = request.json['message']
         id = b64decode(message['data']).decode("utf-8").strip()
-        # convert_file.delay(int(id))
+        convert_file.delay(int(id))
         print(int(id))
         return '', 204
