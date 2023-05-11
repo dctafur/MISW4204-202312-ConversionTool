@@ -58,4 +58,4 @@ def init_restful_api(app):
     api.add_resource(SignUp, '/auth/signup')
     api.add_resource(TaskCrud, '/tasks', '/tasks/<id>')
     api.add_resource(ReadFile, '/files/<filename>')
-    api.add_resource(Convert, '/convert/<id>')
+    api.add_resource(Convert, '/convert')
