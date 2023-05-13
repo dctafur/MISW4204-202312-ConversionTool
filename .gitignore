@@ -164,6 +164,8 @@ cython_debug/
 # Credentials
 .credentials.json
 credentials.json
+credentials-pubsub.json
+credentials-storage.json
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

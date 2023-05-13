@@ -1,3 +1,4 @@
+from json import load
 from os import environ
 from time import gmtime
 from calendar import timegm
@@ -5,6 +6,7 @@ from flask import request, current_app
 from flask_restful import Resource
 from flask_jwt_extended import get_current_user, jwt_required
 from google.cloud import storage, pubsub_v1
+from google.auth import jwt
 
 from app.database import db
 from app.tasks.models import Task, TaskSchema
@@ -69,7 +71,10 @@ class TaskCrud(Resource):
         task_schema = TaskSchema()
         task_response = task_schema.dump(task)
 
-        publisher = pubsub_v1.PublisherClient()
+        service_account_info = load(open('credentials-pubsub.json'))
+        audience = "https://pubsub.googleapis.com/google.pubsub.v1.Publisher"
+        credentials = jwt.Credentials.from_service_account_info(service_account_info, audience=audience)
+        publisher = pubsub_v1.PublisherClient(credentials=credentials)
         topic_path = publisher.topic_path(environ.get('PROJECT_ID'), environ.get('CONVERT_TOPIC_ID'))
         publisher.publish(topic_path, str(task.id).encode("utf-8"))
 
