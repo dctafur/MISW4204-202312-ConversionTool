@@ -4,7 +4,7 @@ from calendar import timegm
 from flask import request, current_app
 from flask_restful import Resource
 from flask_jwt_extended import get_current_user, jwt_required
-from google.cloud import storage
+from google.cloud import storage, pubsub_v1
 
 from app.database import db
 from app.tasks.models import Task, TaskSchema
@@ -67,7 +67,13 @@ class TaskCrud(Resource):
         db.session.commit()
 
         task_schema = TaskSchema()
-        return task_schema.dump(task), 201
+        task_response = task_schema.dump(task)
+
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path(environ.get('PROJECT_ID'), environ.get('CONVERT_TOPIC_ID'))
+        publisher.publish(topic_path, str(task.id).encode("utf-8"))
+
+        return task_response, 201
 
     @jwt_required()
     def delete(self, id):
